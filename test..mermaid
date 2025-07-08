@@ -1,0 +1,12 @@
+flowchart TB
+  subgraph VNet_westus2 [Azure VNet (westus2)]
+    direction TB
+    AKSNodes[AKS Cluster Nodes<br/>(system, primary, media,<br/>msdp, cpctrl, cpdata pools)<br/>Azure CNI Subnet]
+    ANFVolume[Azure NetApp Files Volume<br/>NFSv4.1 (Kerberos-enabled)<br/>Premium tier: 100GiB (expandable)]
+    AKSNodes -- mount NFS (sec=krb5p) --> ANFVolume
+    AKSNodes --- AKSSubnet[AKS Node Subnet (delegated to AKS)]
+    ANFVolume --- ANFSubnet[ANF Delegated Subnet<br/>(delegation: Microsoft.NetApp/volumes)]
+  end
+  ActiveDirectory[(AD DS Domain)]
+  ActiveDirectory == Kerberos SPN & Keytab == ANFVolume
+  ActiveDirectory == Kerberos Ticket (AES-256) == AKSNodes
